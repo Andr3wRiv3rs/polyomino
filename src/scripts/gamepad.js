@@ -9,6 +9,8 @@ let frame = query()
 
 const getGamepad = gamepadIndex => {
   return {
+    index: gamepadIndex,
+
     getButtonDown: buttonIndex => frame.find(({ index }) => index === gamepadIndex).buttons[buttonIndex].pressed,
     getAnyButtonDown: () => frame.find(({ index }) => index === gamepadIndex).buttons.filter(({ pressed }) => pressed),
     
@@ -48,11 +50,9 @@ requestAnimationFrame(loop)
 
 window.addEventListener('gamepadconnected', ({ gamepad }) => {
   if (gamepad.mapping === 'standard') {
-    const player = getGamepad(gamepad.index)
+    gamepadEmitter.emit('connected', getGamepad(gamepad.index))
 
-    console.log(`Player ${gamepad.index} joined.`)
-
-    player.onAnyButtonPress(console.log)
+    console.log(`Gamepad Connected [${ gamepad.id }]`)
   }
 })
 
