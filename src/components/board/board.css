@@ -1,3 +1,4 @@
 .board {
-  
+  height: 100%;
+  image-rendering: pixelated;
 }

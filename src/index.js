@@ -4,8 +4,8 @@ import { router } from 'bitt'
 
 import routes from '@/routes'
 
-import gamepad from '@/scripts/gamepad'
+import gamepads from '@/scripts/gamepads'
 
-window.gamepad = gamepad
+window.gamepads = gamepads
 
 router(document.body /* mount point */, routes).catch(console.error)

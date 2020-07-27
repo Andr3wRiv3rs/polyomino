@@ -7,6 +7,25 @@ const query = () => [...navigator.getGamepads()].filter(gamepad => gamepad && ga
 let previousFrame = []
 let frame = query()
 
+const aliases = {
+  'a': 0,
+  'b': 1,
+  'x': 2,
+  'y': 3,
+  'left-bumper': 4, 
+  'right-bumper': 5,
+  'left-trigger': 6,
+  'right-trigger': 7,
+  'select': 8,
+  'start': 9,
+  'left-stick': 10,
+  'right-stick': 11,
+  'up': 12,
+  'down': 13,
+  'left': 14,
+  'right': 15,
+}
+
 const getGamepad = gamepadIndex => {
   return {
     index: gamepadIndex,
@@ -15,7 +34,7 @@ const getGamepad = gamepadIndex => {
     getAnyButtonDown: () => frame.find(({ index }) => index === gamepadIndex).buttons.filter(({ pressed }) => pressed),
     
     onButtonPress (buttonIndex, callback) {
-      gamepadEmitter.on(`gamepad-${gamepadIndex}-${buttonIndex}`, callback)
+      gamepadEmitter.on(`gamepad-${gamepadIndex}-${ typeof buttonIndex === 'string' ? aliases[buttonIndex] : buttonIndex }`, callback)
     },
     
     onAnyButtonPress (callback) {
@@ -38,7 +57,7 @@ const loop = () => {
         // console.log(`gamepad-${gamepadIndex}-${buttonIndex}`)
         gamepadEmitter.emit(`gamepad-${gamepad.index}-${buttonIndex}`)
         gamepadEmitter.emit(`gamepad-${gamepad.index}-any`, buttonIndex)
-        gamepadEmitter.emit(`gamepad-any`, gamepad.index, buttonIndex)
+        gamepadEmitter.emit(`gamepad-any`, getGamepad(gamepad.index), buttonIndex)
       }
     }
   }
@@ -56,7 +75,17 @@ window.addEventListener('gamepadconnected', ({ gamepad }) => {
   }
 })
 
+window.addEventListener('gamepaddisconnected', ({ gamepad }) => {
+  if (gamepad.mapping === 'standard') {
+    gamepadEmitter.emit('disconnected', gamepad.index)
+
+    console.log(`Gamepad Disconnected [${ gamepad.id }]`)
+  }
+})
+
 export default {
   getGamepad,
-  on: (event, callback) => gamepadEmitter(event, callback),
+
+  on: (...props) => gamepadEmitter.on(...props),
+  emit: (...props) => gamepadEmitter.emit(...props),
 }
