@@ -4,8 +4,8 @@ const gamepadEmitter = new Emitter()
 
 const query = () => [...navigator.getGamepads()].filter(gamepad => gamepad && gamepad.mapping === 'standard')
 
-let previousFrame = []
-let frame = query()
+let previousList = []
+let list = query()
 
 const aliases = {
   'a': 0,
@@ -30,12 +30,19 @@ const getGamepad = gamepadIndex => {
   return {
     index: gamepadIndex,
 
-    getButtonDown: buttonIndex => frame.find(({ index }) => index === gamepadIndex).buttons[buttonIndex].pressed,
-    getAnyButtonDown: () => frame.find(({ index }) => index === gamepadIndex).buttons.filter(({ pressed }) => pressed),
+    // TODO: clear event listeners
+
+    getButtonDown: buttonIndex => list.find(({ index }) => index === gamepadIndex).buttons[typeof buttonIndex === 'string' ? aliases[buttonIndex] : buttonIndex].pressed,
+    getAnyButtonDown: () => list.find(({ index }) => index === gamepadIndex).buttons.filter(({ pressed }) => pressed),
     
     onButtonPress (buttonIndex, callback) {
       gamepadEmitter.on(`gamepad-${gamepadIndex}-${ typeof buttonIndex === 'string' ? aliases[buttonIndex] : buttonIndex }`, callback)
     },
+
+    onButtonRelease (buttonIndex, callback) {
+      gamepadEmitter.on(`gamepad-${gamepadIndex}-${ typeof buttonIndex === 'string' ? aliases[buttonIndex] : buttonIndex }-up`, callback)
+    },
+
     
     onAnyButtonPress (callback) {
       gamepadEmitter.on(`gamepad-${gamepadIndex}-any`, callback)
@@ -44,13 +51,13 @@ const getGamepad = gamepadIndex => {
 }
 
 const loop = () => {
-  previousFrame = frame
-  frame = query()
+  previousList = list
+  list = query()
 
-  for (const gamepadListIndex in frame) {
-    const gamepad = frame[gamepadListIndex]
-    const gamepadButtons = frame[gamepadListIndex].buttons
-    const previousGamepadButtons = previousFrame[gamepadListIndex] && previousFrame[gamepadListIndex].buttons
+  for (const gamepadListIndex in list) {
+    const gamepad = list[gamepadListIndex]
+    const gamepadButtons = list[gamepadListIndex].buttons
+    const previousGamepadButtons = previousList[gamepadListIndex] && previousList[gamepadListIndex].buttons
 
     for (const buttonIndex in gamepadButtons) {
       if (gamepadButtons[buttonIndex].pressed && (!previousGamepadButtons || !previousGamepadButtons[buttonIndex].pressed)) {
@@ -58,6 +65,13 @@ const loop = () => {
         gamepadEmitter.emit(`gamepad-${gamepad.index}-${buttonIndex}`)
         gamepadEmitter.emit(`gamepad-${gamepad.index}-any`, buttonIndex)
         gamepadEmitter.emit(`gamepad-any`, getGamepad(gamepad.index), buttonIndex)
+      }
+
+      if (!gamepadButtons[buttonIndex].pressed && (previousGamepadButtons && previousGamepadButtons[buttonIndex].pressed)) {
+        // console.log(`gamepad-${gamepadIndex}-${buttonIndex}`)
+        gamepadEmitter.emit(`gamepad-${gamepad.index}-${buttonIndex}-up`)
+        gamepadEmitter.emit(`gamepad-${gamepad.index}-any-up`, buttonIndex)
+        gamepadEmitter.emit(`gamepad-any-up`, getGamepad(gamepad.index), buttonIndex)
       }
     }
   }
@@ -69,17 +83,17 @@ requestAnimationFrame(loop)
 
 window.addEventListener('gamepadconnected', ({ gamepad }) => {
   if (gamepad.mapping === 'standard') {
-    gamepadEmitter.emit('connected', getGamepad(gamepad.index))
-
     console.log(`Gamepad Connected [${ gamepad.id }]`)
+
+    gamepadEmitter.emit('connected', getGamepad(gamepad.index))
   }
 })
 
 window.addEventListener('gamepaddisconnected', ({ gamepad }) => {
   if (gamepad.mapping === 'standard') {
-    gamepadEmitter.emit('disconnected', gamepad.index)
-
     console.log(`Gamepad Disconnected [${ gamepad.id }]`)
+
+    gamepadEmitter.emit('disconnected', gamepad.index)
   }
 })
 
@@ -88,4 +102,8 @@ export default {
 
   on: (...props) => gamepadEmitter.on(...props),
   emit: (...props) => gamepadEmitter.emit(...props),
+
+  get list () {
+    return list.map(({ index }) => getGamepad(index))
+  },
 }

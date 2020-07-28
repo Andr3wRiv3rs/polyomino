@@ -5,4 +5,8 @@ export default [
     regex: /^\/?$/,
     component: singleplayer,
   },
+  {
+    regex: /^\/editor\/?$/,
+    module: () => import('./views/editor/'),
+  },
 ]

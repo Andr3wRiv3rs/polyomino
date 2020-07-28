@@ -1,4 +1,15 @@
 .board {
   height: 100%;
   image-rendering: pixelated;
+  position: relative;
+  z-index: 1;
+}
+
+.blur, .ghost {
+  position: absolute;
+  z-index: 0;
+}
+
+.ghost {
+  opacity: 0.06;
 }
