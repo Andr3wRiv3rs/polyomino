@@ -30,17 +30,35 @@ const getGamepad = gamepadIndex => {
   return {
     index: gamepadIndex,
 
-    // TODO: clear event listeners
-
     getButtonDown: buttonIndex => list.find(({ index }) => index === gamepadIndex).buttons[typeof buttonIndex === 'string' ? aliases[buttonIndex] : buttonIndex].pressed,
     getAnyButtonDown: () => list.find(({ index }) => index === gamepadIndex).buttons.filter(({ pressed }) => pressed),
     
     onButtonPress (buttonIndex, callback) {
       gamepadEmitter.on(`gamepad-${gamepadIndex}-${ typeof buttonIndex === 'string' ? aliases[buttonIndex] : buttonIndex }`, callback)
+      
+      let releaseListener
+
+      return {
+        removeListener: () => {
+          if (releaseListener) releaseListener.removeListener()
+
+          gamepadEmitter.removeListener(`gamepad-${gamepadIndex}-${ typeof buttonIndex === 'string' ? aliases[buttonIndex] : buttonIndex }`, callback)
+        },
+
+        onRelease: (callback) => {
+          const releaseListener = this.onButtonRelease(buttonIndex, callback)
+
+          return releaseListener
+        },
+      }
     },
 
     onButtonRelease (buttonIndex, callback) {
       gamepadEmitter.on(`gamepad-${gamepadIndex}-${ typeof buttonIndex === 'string' ? aliases[buttonIndex] : buttonIndex }-up`, callback)
+      
+      return {
+        removeListener: () => gamepadEmitter.removeListener(`gamepad-${gamepadIndex}-${ typeof buttonIndex === 'string' ? aliases[buttonIndex] : buttonIndex }-up`, callback),
+      }
     },
 
     

@@ -1,6 +1,7 @@
 import style from './singleplayer.css'
 
 import board from '@/components/board'
+import gamepads from '../../scripts/gamepads'
 
 export default ({ newState }) => {
   let state 
@@ -13,62 +14,65 @@ export default ({ newState }) => {
     class: style.game,
 
     onMounted () {
-      state.Player.on('lose', () => console.log('You lost!'))
+      const { Player } = state
 
-      setTimeout(() => {
-        const gamepad = gamepads.list[0]
+      Player.on('lose', () => console.log('You lost!'))
 
-        gamepad.onButtonPress('left', () => {
+      const moveInterval = (controller, button, action) => {
+        controller.onButtonPress(button, () => {
           let timeout, interval
 
-          state.Player.goLeft()
+          action()
 
           timeout = setTimeout(() => {
             interval = setInterval(() => {
-              if (gamepad.getButtonDown('left')) state.Player.goLeft()
+              if (controller.getButtonDown(button)) action()
               else {
                 clearTimeout(timeout)
                 clearInterval(interval)
               }
             }, 50)
           }, 150)
-
-          gamepad.onButtonRelease('left', () => {
+          
+          const releaseListener = controller.onButtonRelease(button, () => {
             clearTimeout(timeout)
             clearInterval(interval)
+
+            releaseListener.removeListener()
           })
         })
-        
-        gamepad.onButtonPress('right', () => {
-          let timeout, interval
+      }
 
-          state.Player.goRight()
+      const start = () => {
+        const gamepad = gamepads.list[0]
 
-          timeout = setTimeout(() => {
-            interval = setInterval(() => {
-              if (gamepad.getButtonDown('right')) state.Player.goRight()
-            }, 50)
-          }, 150)
+        const zeroG = false
 
-          gamepad.onButtonRelease('right', () => {
-            clearTimeout(timeout)
-            clearInterval(interval)
-          })
-        })
+        moveInterval(gamepad, 'left', Player.goLeft)
+        moveInterval(gamepad, 'right', Player.goRight)
 
-        gamepad.onButtonPress('b', state.Player.rotateRight)
-        gamepad.onButtonPress('a', state.Player.rotateLeft)
+        gamepad.onButtonPress('b', Player.rotateRight)
+        gamepad.onButtonPress('a', Player.rotateLeft)
 
-        gamepad.onButtonPress('up', state.Player.instantlyPlace)
+        if (zeroG) {
+          moveInterval(gamepad, 'down', Player.goDown)
+          moveInterval(gamepad, 'up', Player.goUp)
+  
+          gamepad.onButtonPress('x', Player.place)
+        } else {
+          gamepad.onButtonPress('up', Player.instantlyPlace)
+          gamepad.onButtonPress('down', () => Player.setSpeedMultiplier(10)).onRelease(() => Player.setSpeedMultiplier(1))
 
-        gamepad.onButtonPress('down', () => {
-          state.Player.setSpeedMultiplier(10)
-          state.Player.restartLoop()
-        })
+          Player.start()
+        }
 
-        gamepad.onButtonRelease('down', () => state.Player.setSpeedMultiplier(1))
+        Player.ready()
+      }
 
-      }, 500)
+      if (gamepads.list[0]) requestAnimationFrame(start)
+      else {
+        gamepads.on('connected', () => requestAnimationFrame(start))
+      } 
     },
   }, [
     ['div', [state.Player.component]],

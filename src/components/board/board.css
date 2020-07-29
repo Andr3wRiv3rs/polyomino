@@ -5,11 +5,16 @@
   z-index: 1;
 }
 
-.blur, .ghost {
+.blur, .ghost, .debug {
   position: absolute;
   z-index: 0;
 }
 
 .ghost {
   opacity: 0.06;
+}
+
+.blur {
+  filter: blur(15px);
+  opacity: 0.5;
 }
