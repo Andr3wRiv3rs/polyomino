@@ -43,25 +43,23 @@ export default ({ newState }) => {
         })
       }
 
-      const start = () => {
-        const gamepad = gamepads.list[0]
-
+      const start = ({ bindings, ...controller }) => {
         const zeroG = false
 
-        moveInterval(gamepad, 'left', Player.goLeft)
-        moveInterval(gamepad, 'right', Player.goRight)
+        moveInterval(controller, bindings.left, Player.goLeft)
+        moveInterval(controller, bindings.right, Player.goRight)
 
-        gamepad.onButtonPress('b', Player.rotateRight)
-        gamepad.onButtonPress('a', Player.rotateLeft)
+        controller.onButtonPress(bindings.rotateRight, Player.rotateRight)
+        controller.onButtonPress(bindings.rotateLeft, Player.rotateLeft)
 
         if (zeroG) {
-          moveInterval(gamepad, 'down', Player.goDown)
-          moveInterval(gamepad, 'up', Player.goUp)
+          moveInterval(controller, bindings.down, Player.goDown)
+          moveInterval(controller, bindings.up, Player.goUp)
   
-          gamepad.onButtonPress('x', Player.place)
+          controller.onButtonPress(bindings.place, Player.place)
         } else {
-          gamepad.onButtonPress('up', Player.instantlyPlace)
-          gamepad.onButtonPress('down', () => Player.setSpeedMultiplier(10)).onRelease(() => Player.setSpeedMultiplier(1))
+          controller.onButtonPress(bindings.up, Player.instantlyPlace)
+          controller.onButtonPress(bindings.down, () => Player.setSpeedMultiplier(10)).onRelease(() => Player.setSpeedMultiplier(1))
 
           Player.start()
         }
@@ -69,10 +67,12 @@ export default ({ newState }) => {
         Player.ready()
       }
 
-      if (gamepads.list[0]) requestAnimationFrame(start)
-      else {
-        gamepads.on('connected', () => requestAnimationFrame(start))
-      } 
+      requestAnimationFrame(() => {
+        // if (gamepads.list[0]) start(gamepads.list[0])
+        // else gamepads.on('connected', () => start(gamepads.list[0]))
+
+        start(keyboard)
+      })
     },
   }, [
     ['div', [state.Player.component]],

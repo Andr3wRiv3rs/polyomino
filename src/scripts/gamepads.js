@@ -26,9 +26,22 @@ const aliases = {
   'right': 15,
 }
 
+const bindings = {
+  up: 'up',
+  down: 'down',
+  left: 'left',
+  right: 'right',
+  rotateLeft: 'a',
+  rotateRight: 'b',
+  place: 'x',
+  pause: 'start',
+}
+
 const getGamepad = gamepadIndex => {
   return {
     index: gamepadIndex,
+
+    bindings,
 
     getButtonDown: buttonIndex => list.find(({ index }) => index === gamepadIndex).buttons[typeof buttonIndex === 'string' ? aliases[buttonIndex] : buttonIndex].pressed,
     getAnyButtonDown: () => list.find(({ index }) => index === gamepadIndex).buttons.filter(({ pressed }) => pressed),
