@@ -8,7 +8,7 @@
   "license": "N/A",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_ENV=development multiscript webpack-dev-server + electron .",
+    "dev": "cross-env NODE_ENV=development multiscript webpack-dev-server + electron . --force-color-profile=srgb",
     "build": "cross-env NODE_ENV=production webpack --mode=production"
   },
   "devDependencies": {

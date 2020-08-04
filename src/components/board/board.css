@@ -6,15 +6,16 @@
 }
 
 .blur, .ghost, .debug {
+  image-rendering: pixelated;
   position: absolute;
   z-index: 0;
 }
 
 .ghost {
-  opacity: 0.06;
+  opacity: 0.09;
 }
 
 .blur {
-  filter: blur(15px);
+  filter: blur(10px);
   opacity: 0.5;
 }

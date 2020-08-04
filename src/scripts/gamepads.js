@@ -92,14 +92,12 @@ const loop = () => {
 
     for (const buttonIndex in gamepadButtons) {
       if (gamepadButtons[buttonIndex].pressed && (!previousGamepadButtons || !previousGamepadButtons[buttonIndex].pressed)) {
-        // console.log(`gamepad-${gamepadIndex}-${buttonIndex}`)
         gamepadEmitter.emit(`gamepad-${gamepad.index}-${buttonIndex}`)
         gamepadEmitter.emit(`gamepad-${gamepad.index}-any`, buttonIndex)
         gamepadEmitter.emit(`gamepad-any`, getGamepad(gamepad.index), buttonIndex)
       }
 
       if (!gamepadButtons[buttonIndex].pressed && (previousGamepadButtons && previousGamepadButtons[buttonIndex].pressed)) {
-        // console.log(`gamepad-${gamepadIndex}-${buttonIndex}`)
         gamepadEmitter.emit(`gamepad-${gamepad.index}-${buttonIndex}-up`)
         gamepadEmitter.emit(`gamepad-${gamepad.index}-any-up`, buttonIndex)
         gamepadEmitter.emit(`gamepad-any-up`, getGamepad(gamepad.index), buttonIndex)

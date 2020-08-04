@@ -3,6 +3,8 @@ process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
 
+app.commandLine.appendSwitch('force-color-profile', 'srgb')
+
 const createWindow  = () => {
   const mainWindow = new BrowserWindow({
     width: 1200,

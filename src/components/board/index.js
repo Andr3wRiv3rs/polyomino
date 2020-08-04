@@ -25,7 +25,16 @@ export default () => {
 
   const t = int => int * Math.floor(resolutionQuotient) // translate
 
-  const blockColor = '#5BDAFF'
+  const blockColors = [
+    '#ff1660', // red
+    '#ff3295', // violet
+    '#ffff00', // yellow
+    '#16ff92', // green
+    '#5BDAFF', // cyan
+    '#FFFFFF', // white
+    '#5b87ff', // blue
+  ]
+
   const borderColor = getComputedStyle(document.children[0]).getPropertyValue('--border')
   const boardEmitter = new Emitter()
   const grid = [], queue = [], hand = []
@@ -81,11 +90,13 @@ export default () => {
     rotation: 0,
     block: hand[0],
     index: 0,
+    color: blockColors[1],
   }
 
   const setHeld = index => {
     held.block = hand[index]
     held.index = index
+    held.color = '#ff1660'//blockColors[Math.floor(Math.random() * blockColors.length)]
   }
 
   const getNextHeld = () => {
@@ -137,9 +148,7 @@ export default () => {
     )
 
     getNextHeld()
-
     clear()
-
     draw()
   }
 
@@ -156,11 +165,7 @@ export default () => {
       } else {
         lock = true
       }
-    } else {
-      clear()
-      held.y++
-      draw()
-    }
+    } else goDown()
   }
    
   // let started = false
@@ -179,9 +184,8 @@ export default () => {
     step()
   }
 
-  const clearRect = (x, y, width, height) => {
-    context.clearRect(x, y, width, height)
-  }
+  const clearRect = (x, y, width, height) => context.clearRect(x, y, width, height)
+  const clearCanvas = (canvas, context) => context.clearRect(0, 0, canvas.width, canvas.height)
 
   const drawRect = (x, y, width, height, fill = borderColor) => {
     context.fillStyle = fill
@@ -194,7 +198,7 @@ export default () => {
     context.clearRect(x * blockSize + px, y * blockSize + px, blockSize, blockSize)
   }
 
-  const drawBlock = ({ x, y, value }, fill = blockColor) => {
+  const drawBlock = ({ x, y, value }, fill = held.color) => {
     if (value !== 1) return
 
     context.fillStyle = fill
@@ -202,10 +206,6 @@ export default () => {
     context.clearRect(x * blockSize + (px * 3), y * blockSize + (px * 2) + px, blockSize - (px * 3), blockSize - (px * 3))
     context.fillRect(x * blockSize + (px * 6), y * blockSize + (px * 2) + (px * 3), px, px)
     context.fillRect(x * blockSize + (px * 7), y * blockSize + (px * 2) + (px * 2), px, px)
-  }
-
-  const clearGhost = () => {
-    ghostContext.clearRect(0, 0, ghostCanvas.width, ghostCanvas.height)
   }
 
   const drawGhost = () => {
@@ -216,7 +216,7 @@ export default () => {
       ghostCanvas.height * 1.7, 
     )
 
-    ghost.addColorStop(0, blockColor)
+    ghost.addColorStop(0, held.color)
     ghost.addColorStop(1, 'transparent')
 
     ghostContext.fillStyle = ghost
@@ -275,13 +275,22 @@ export default () => {
     drawRect(canvas.width - (px * 2), 0, px, canvas.height)
   }
 
+  const clear = () => {
+    iterateHeld(held, clearBlock)
+    clearCanvas(ghostCanvas, ghostContext)
+    clearCanvas(blurCanvas, blurContext)
+    clearCanvas(debugCanvas, debugContext)
+  }
+
   const draw = () => {
     iterateHeld(held, drawBlock)
 
     drawGhost()
     drawFrame()
 
+    clearFrame()
     blurContext.drawImage(canvas, 0, 0, t(canvas.width), t(canvas.height))
+    drawFrame()
 
     if (debug) {
       for (let x = 0; x < grid.length; x++) {
@@ -300,13 +309,6 @@ export default () => {
         }
       }
     }
-  }
-
-  const clear = () => {
-    iterateHeld(held, clearBlock)
-    clearGhost()
-    clearFrame()
-    blurContext.clearRect(0, 0, blurCanvas.width, blurCanvas.height)
   }
 
   const resizeCanvas = () => {
@@ -371,9 +373,7 @@ export default () => {
     while (!willCollide({
       ...held,
       y: held.y + 1,
-    })) {
-      step()
-    }
+    })) step()
 
     step()
   }
@@ -388,7 +388,6 @@ export default () => {
     canvas.width = gridWidth * blockSize + (px * 4)
 
     getNextHeld()
-
     resizeCanvas()
 
     window.addEventListener('resize', resizeCanvas)
