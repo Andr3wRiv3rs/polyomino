@@ -33,6 +33,8 @@ const bindings = {
   right: 'right',
   rotateLeft: 'a',
   rotateRight: 'b',
+  previousHeld: 'left-bumper',
+  nextHeld: 'right-bumper',
   place: 'x',
   pause: 'start',
 }

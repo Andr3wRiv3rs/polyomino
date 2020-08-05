@@ -34,6 +34,9 @@ const bind = (board, { bindings, ...controller }, options = {}) => {
   controller.onButtonPress(bindings.rotateRight, board.rotateRight)
   controller.onButtonPress(bindings.rotateLeft, board.rotateLeft)
 
+  controller.onButtonPress(bindings.previousHeld, board.previousHeld)
+  controller.onButtonPress(bindings.nextHeld, board.nextHeld)
+
   if (zeroG) {
     moveInterval(controller, bindings.down, board.goDown)
     moveInterval(controller, bindings.up, board.goUp)

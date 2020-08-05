@@ -19,7 +19,7 @@ const shuffle = (array) => {
 const debug = false
 
 export default () => {
-  let canvas, context, blurCanvas, blurContext, ghostCanvas, ghostContext, debugCanvas, debugContext, timeout
+  let canvas, context, frameCanvas, frameContext, blurCanvas, blurContext, ghostCanvas, ghostContext, debugCanvas, debugContext, timeout
 
   let resolutionQuotient = 1
 
@@ -40,6 +40,7 @@ export default () => {
   const grid = [], queue = [], hand = []
   const blockSize = 9, speed = 500, gridWidth = 16, gridHeight = 30
   const px = blockSize / 9
+  const handBlockSize = (gridHeight * blockSize + 2) / 4
 
   let speedMultiplier = 1
 
@@ -89,18 +90,22 @@ export default () => {
     y: 0,
     rotation: 0,
     block: hand[0],
-    index: 0,
-    color: blockColors[1],
+    index: 2,
+    color: blockColors[3],
   }
 
   const setHeld = index => {
     held.block = hand[index]
     held.index = index
-    held.color = '#ff1660'//blockColors[Math.floor(Math.random() * blockColors.length)]
+    // held.color = 
   }
 
-  const getNextHeld = () => {
-    hand.splice(held.index, 1)
+  const getNextHeld = (splice = true) => {
+    if (splice) {
+      hand.splice(held.index, 1)
+      hand.push(...queue.splice(0, 1))
+    }
+
     if (hand.length === 0) pushHand()
     if (queue.length < 4) pushQueue()
 
@@ -147,6 +152,7 @@ export default () => {
       },
     )
 
+    // clearFrame()
     getNextHeld()
     clear()
     draw()
@@ -184,12 +190,12 @@ export default () => {
     step()
   }
 
-  const clearRect = (x, y, width, height) => context.clearRect(x, y, width, height)
+  const clearRect = (x, y, width, height, ctx = context) => ctx.clearRect(x, y, width, height)
   const clearCanvas = (canvas, context) => context.clearRect(0, 0, canvas.width, canvas.height)
 
-  const drawRect = (x, y, width, height, fill = borderColor) => {
-    context.fillStyle = fill
-    context.fillRect(x, y, width, height)
+  const drawRect = (x, y, width, height, fill = borderColor, ctx = context) => {
+    ctx.fillStyle = fill
+    ctx.fillRect(x, y, width, height)
   }
 
   const clearBlock = ({ x, y, value }) => {
@@ -198,14 +204,30 @@ export default () => {
     context.clearRect(x * blockSize + px, y * blockSize + px, blockSize, blockSize)
   }
 
-  const drawBlock = ({ x, y, value }, fill = held.color) => {
+  const drawBlock = ({
+    x, 
+    y, 
+    xPrecise, 
+    yPrecise, 
+    value, 
+  }, fill = held.color) => {
     if (value !== 1) return
 
+    // real coordinates
+    const nx = xPrecise || (x * blockSize + (px * 2))
+    const ny = yPrecise || (y * blockSize + (px * 2))
+
     context.fillStyle = fill
-    context.fillRect(x * blockSize + (px * 2), y * blockSize + (px * 2), blockSize - px, blockSize - px)
-    context.clearRect(x * blockSize + (px * 3), y * blockSize + (px * 2) + px, blockSize - (px * 3), blockSize - (px * 3))
-    context.fillRect(x * blockSize + (px * 6), y * blockSize + (px * 2) + (px * 3), px, px)
-    context.fillRect(x * blockSize + (px * 7), y * blockSize + (px * 2) + (px * 2), px, px)
+
+    // whole block
+    context.fillRect(nx, ny, blockSize - px, blockSize - px)
+    
+    // clear middle
+    context.clearRect(nx + px, ny + px, blockSize - (px * 3), blockSize - (px * 3))
+
+    // dots
+    context.fillRect(nx + (px * 4), ny + (px * 3), px, px)
+    context.fillRect(nx + (px * 5), ny + (px * 2), px, px)
   }
 
   const drawGhost = () => {
@@ -261,36 +283,88 @@ export default () => {
     )
   }
 
-  const clearFrame = () => {
-    clearRect(0, 0, px, canvas.height)
-    clearRect(px, canvas.height  - px, canvas.width - (px * 3), px)
-    clearRect(px, 0, canvas.width - (px * 3), px)
-    clearRect(canvas.width - (px * 2), 0, px, canvas.height)
-  }
+  // const clearFrame = () => {
+  //   clearRect(0, 0, px, canvas.height)
+  //   clearRect(px, canvas.height - px, canvas.width - (px * 2) , px)
+  //   clearRect(px, 0, canvas.width - (px * 3), px)
+  //   clearRect(canvas.width - handBlockSize - (px * 2), 0, px, canvas.height)
+  //   clearRect(canvas.width - (px * 2), 0, px, canvas.height)
+  //   clearRect(canvas.width - handBlockSize - (px * 2), handBlockSize * held.index, handBlockSize, canvas.height)
+  // }
 
   const drawFrame = () => {
-    drawRect(0, 0, px, canvas.height)
-    drawRect(px, canvas.height  - px, canvas.width - (px * 3), px)
-    drawRect(px, 0, canvas.width - (px * 3), px)
-    drawRect(canvas.width - (px * 2), 0, px, canvas.height)
+    drawRect(0, 0, px, canvas.height, borderColor, frameContext)
+    drawRect(px, canvas.height - px, canvas.width - (px * 2), px, borderColor, frameContext)
+    drawRect(px, 0, canvas.width - (px * 3), px, borderColor, frameContext)
+    drawRect(canvas.width - handBlockSize - (px * 2), 0, px, canvas.height, borderColor, frameContext)
+    drawRect(canvas.width - (px * 2), 0, px, canvas.height, borderColor, frameContext)
+
+    // held
+    drawRect(canvas.width - handBlockSize - (px * 2), handBlockSize * held.index, handBlockSize, handBlockSize, borderColor, frameContext)
+  }
+
+  const drawHand = () => {
+    for (const i in hand) {
+      const block = hand[i][0]
+
+      let minX = gridWidth, maxX = 0, minY = gridHeight, maxY = -5
+  
+      iterate({
+        x: 0,
+        y: 0,
+        block,
+      }, ({ x, y, value }) => {
+        if (value === 1) {
+          if (x < minX) minX = x
+          if (x + 1 > maxX) maxX = x + 1
+          if (y < minY) minY = y
+          if (y + 1 > maxY) maxY = y + 1
+        }
+      })
+
+      const width = maxX - minX
+      const height = maxY - minY
+
+      const originX = canvas.width - (handBlockSize / 2) - ((minX - ((5 - width) / 2)) * blockSize)
+      const originY = handBlockSize * i + (handBlockSize / 2) - ((minY - ((5 - height) / 2)) * blockSize)
+  
+      iterate({
+        x: 0,
+        y: 0,
+        block,
+      }, ({ x, y, value }) => {
+        drawBlock({
+          xPrecise: Math.floor(originX - px + (x - 2.5) * blockSize), 
+          yPrecise: Math.floor(originY + (y - 2.5) * blockSize),
+          value,
+        })
+      })
+    }
   }
 
   const clear = () => {
     iterateHeld(held, clearBlock)
+    clearCanvas(frameCanvas, frameContext)
     clearCanvas(ghostCanvas, ghostContext)
     clearCanvas(blurCanvas, blurContext)
     clearCanvas(debugCanvas, debugContext)
+    // clearFrame()
   }
 
   const draw = () => {
     iterateHeld(held, drawBlock)
 
+    clearRect(canvas.width - handBlockSize - (px * 2), handBlockSize * held.index, handBlockSize, canvas.height)
+    drawFrame()
+    drawHand()
+
     drawGhost()
     drawFrame()
 
-    clearFrame()
+    // clearFrame()
+    clearRect(px, 0, canvas.width - (px * 3), px)
     blurContext.drawImage(canvas, 0, 0, t(canvas.width), t(canvas.height))
-    drawFrame()
+    drawRect(px, 0, canvas.width - (px * 3), px, borderColor)
 
     if (debug) {
       for (let x = 0; x < grid.length; x++) {
@@ -321,6 +395,10 @@ export default () => {
       width, 
       height,
     } = canvas.getBoundingClientRect()
+
+    frameCanvas.style.height = canvas.style.height
+    frameCanvas.height = canvas.height
+    frameCanvas.width = canvas.width
 
     const applyResize = (...canvases) => canvases.forEach(canvas => {
       canvas.height = height
@@ -385,9 +463,9 @@ export default () => {
 
   const ready = () => {
     canvas.height = gridHeight * blockSize + (px * 3)
-    canvas.width = gridWidth * blockSize + (px * 4)
+    canvas.width = gridWidth * blockSize + (px * 4) + (handBlockSize)
 
-    getNextHeld()
+    getNextHeld(false /* splice */)
     resizeCanvas()
 
     window.addEventListener('resize', resizeCanvas)
@@ -395,22 +473,47 @@ export default () => {
     step()
   }
 
+  const previousHeld = () => {
+    if (held.index > 0) {
+      clear()
+      setHeld(held.index - 1)
+      draw()
+    }
+  }
+
+  const nextHeld = () => {
+    if (held.index < hand.length - 1) {
+      clear()
+      setHeld(held.index + 1)
+      draw()
+    }
+  }
+
   const component = [
-    ['canvas', {
-      class: `${style.blur} ${style.board}`,
-
-      onMounted () {
-        blurCanvas = this
-        blurContext = this.getContext('2d')
-      },
-    }],
-
     ['canvas', { 
       class: `${style.ghost} ${style.board}`,
 
       onMounted () {
         ghostCanvas = this
         ghostContext = this.getContext('2d')
+      },
+    }],
+
+    ['canvas', { 
+      class: `${style.frame} ${style.board}`,
+
+      onMounted () {
+        frameCanvas = this
+        frameContext = this.getContext('2d')
+      },
+    }],
+
+    ['canvas', {
+      class: `${style.blur} ${style.board}`,
+
+      onMounted () {
+        blurCanvas = this
+        blurContext = this.getContext('2d')
       },
     }],
 
@@ -450,6 +553,8 @@ export default () => {
     rotateLeft,
     rotateRight,
     setHeld,
+    previousHeld,
+    nextHeld,
     setSpeedMultiplier,
     place,
     instantlyPlace,

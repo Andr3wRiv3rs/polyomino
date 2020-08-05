@@ -16,10 +16,10 @@ export default ({ newState }) => {
 
     onMounted () {
       requestAnimationFrame(() => {
-        // if (gamepads.list[0]) start(gamepads.list[0])
-        // else gamepads.on('connected', () => start(gamepads.list[0]))
+        if (gamepads.list[0]) boardController.bind(state.Player, gamepads.list[0])
+        else gamepads.on('connected', () => boardController.bind(state.Player, gamepads.list[0]))
 
-        boardController.bind(state.Player, keyboard)
+        // boardController.bind(state.Player, keyboard)
       })
     },
   }, [

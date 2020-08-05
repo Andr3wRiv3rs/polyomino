@@ -1,11 +1,11 @@
-.board {
+.board, .frame {
   height: 100%;
   image-rendering: pixelated;
   position: relative;
   z-index: 1;
 }
 
-.blur, .ghost, .debug {
+.blur, .ghost, .debug, .frame {
   image-rendering: pixelated;
   position: absolute;
   z-index: 0;
@@ -17,5 +17,5 @@
 
 .blur {
   filter: blur(10px);
-  opacity: 0.5;
+  opacity: 0.4;
 }
