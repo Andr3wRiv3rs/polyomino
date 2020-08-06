@@ -18,7 +18,5 @@ export default () => {
         board.start()
       })
     },
-  }, [
-    board.component,
-  ]]
+  }, [board.component]]
 }

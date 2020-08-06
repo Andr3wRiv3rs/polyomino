@@ -30,18 +30,38 @@ export const getLayerComponent = () => {
   })
 }
 
-export const resizeLayer = ({ canvas }) => {
-  canvas.height = canvas.parentElement.clientHeight
-  canvas.width = canvas.parentElement.clientHeight
-  console.log(canvas.height)
+export const resizeLayer = (width, height) => ({ canvas }) => {
+  canvas.height = height
+  canvas.width = width
+
+  canvas.style.height = height + 'px'
+  canvas.style.width = width + 'px'
 }
 
-export const setupResizeListener = (callback = () => {}) => {
-  layers.forEach(resizeLayer)
+export const resize = (aspectRatio, callback) => {
+  const container = layers[0].canvas.parentElement
+
+  const padding = 100
+
+  let width = window.innerWidth - padding
+  let height = width * aspectRatio
+
+  if (height > window.innerHeight - padding) {
+    height = window.innerHeight - padding
+    width = height / aspectRatio
+  }
+
+  container.style.width = width + 'px'
+  container.style.height = height + 'px'
+
+  layers.forEach(resizeLayer(width, height))
   callback()
+} 
+
+export const setupResizeListener = (aspectRatio, callback = () => {}) => {
+  resize(aspectRatio, callback)
 
   window.addEventListener('resize', () => {
-    layers.forEach(resizeLayer)
-    callback()
+    resize(aspectRatio, callback)
   })
 }

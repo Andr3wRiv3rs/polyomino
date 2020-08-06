@@ -1,4 +1,5 @@
 import Emitter from 'events'
+import style from './board.css'
 
 import { 
   newLayer,
@@ -8,19 +9,24 @@ import {
 
 import * as draw from './draw'
 
+import { drawGrid } from './grid'
+
 const boardEmitter = new Emitter()
 
 const gridLayer = newLayer('grid')
 const mainLayer = newLayer('main')
 
-const redraw = () => {
-  draw.rect(mainLayer, 0, 0, 100, 100)
-}
+const start = (gridWidth = 30, gridHeight = 15) => {
+  const aspectRatio = gridHeight / gridWidth
 
-const start = () => {
-  setupResizeListener(() => {
+  setupResizeListener(aspectRatio, () => {
+    const tile = mainLayer.canvas.width / gridWidth
+
     draw.clear(mainLayer)
-    redraw()
+    draw.clear(gridLayer)
+    drawGrid(gridLayer, gridWidth, gridHeight)
+
+    draw.rect(mainLayer, tile * 2, tile * 1, tile, tile)
   })
 }
 
@@ -30,5 +36,7 @@ export default {
 
   start,
 
-  component: getLayerComponent(),
+  component: ['div', { 
+    class: style.container,
+  }, getLayerComponent()],
 }

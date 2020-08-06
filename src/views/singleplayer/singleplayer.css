@@ -2,15 +2,6 @@
   display: flex;
   justify-content: center;
   width: 100%;
-  /* padding: 60px; */
   height: 100%;
   align-items: center;
-}
-
-.game > div {
-  display: flex;
-  height: 100%;
-  flex-grow: 1;
-  align-items: center;
-  justify-content: center;
 }
