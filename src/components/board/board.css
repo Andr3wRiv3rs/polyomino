@@ -1,21 +1,11 @@
-.board, .frame {
-  height: 100%;
-  image-rendering: pixelated;
-  position: relative;
-  z-index: 1;
-}
-
-.blur, .ghost, .debug, .frame {
-  image-rendering: pixelated;
+.canvas {
+  height: 90vh;
   position: absolute;
-  z-index: 0;
+  left: 0;
+  top: 0;
+  image-rendering: pixelated;
 }
 
-.ghost {
-  opacity: 0.09;
-}
+.main, .grid {
 
-.blur {
-  filter: blur(10px);
-  opacity: 0.4;
 }

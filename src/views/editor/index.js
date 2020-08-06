@@ -1,6 +1,6 @@
 import style from './editor.css'
 
-import blockTypes from '@/components/board/blockTypes'
+import blockTypes from '@/components/tetris/blockTypes'
 
 export default () => {
   let canvas, context, resolutionQuotient
