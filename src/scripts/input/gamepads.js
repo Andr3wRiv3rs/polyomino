@@ -97,13 +97,13 @@ const loop = () => {
     for (const buttonIndex in gamepadButtons) {
       if (gamepadButtons[buttonIndex].pressed && (!previousGamepadButtons || !previousGamepadButtons[buttonIndex].pressed)) {
         gamepadEmitter.emit(`gamepad-${gamepad.index}-${buttonIndex}`)
-        gamepadEmitter.emit(`gamepad-${gamepad.index}-any`, buttonIndex)
+        gamepadEmitter.emit(`gamepad-${gamepad.index}-any`, getGamepad(gamepad.index), buttonIndex)
         gamepadEmitter.emit(`gamepad-any`, getGamepad(gamepad.index), buttonIndex)
       }
 
       if (!gamepadButtons[buttonIndex].pressed && (previousGamepadButtons && previousGamepadButtons[buttonIndex].pressed)) {
         gamepadEmitter.emit(`gamepad-${gamepad.index}-${buttonIndex}-up`)
-        gamepadEmitter.emit(`gamepad-${gamepad.index}-any-up`, buttonIndex)
+        gamepadEmitter.emit(`gamepad-${gamepad.index}-any-up`, getGamepad(gamepad.index), buttonIndex)
         gamepadEmitter.emit(`gamepad-any-up`, getGamepad(gamepad.index), buttonIndex)
       }
     }
@@ -116,7 +116,7 @@ requestAnimationFrame(loop)
 
 window.addEventListener('gamepadconnected', ({ gamepad }) => {
   if (gamepad.mapping === 'standard') {
-    console.log(`Gamepad Connected [${ gamepad.id }]`)
+    console.log(`Gamepad connected [${ gamepad.id }]`)
 
     gamepadEmitter.emit('connected', getGamepad(gamepad.index))
   }
@@ -124,13 +124,13 @@ window.addEventListener('gamepadconnected', ({ gamepad }) => {
 
 window.addEventListener('gamepaddisconnected', ({ gamepad }) => {
   if (gamepad.mapping === 'standard') {
-    console.log(`Gamepad Disconnected [${ gamepad.id }]`)
+    console.log(`Gamepad disconnected [${ gamepad.id }]`)
 
     gamepadEmitter.emit('disconnected', gamepad.index)
   }
 })
 
-export const keyboard = {
+export const gamepads = {
   getGamepad,
 
   on: (...props) => gamepadEmitter.on(...props),

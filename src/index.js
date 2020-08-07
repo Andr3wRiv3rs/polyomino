@@ -12,4 +12,4 @@ import {
 window.gamepads = gamepads
 window.keyboard = keyboard
 
-router(document.body /* mount point */, routes).catch(console.error)
+router(document.body /* mount point */, routes, { mode: 'hash' }).catch(console.error)

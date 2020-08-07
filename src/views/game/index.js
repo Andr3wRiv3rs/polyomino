@@ -1,9 +1,6 @@
 import style from './game.css'
 
-import { cursorController } from '@/scripts/input'
-
 import {
-  drawRect, 
   drawGrid,
   clearLayers, 
   newLayer,
@@ -13,6 +10,12 @@ import {
 
 import Emitter from 'events'
 
+import { 
+  cursors,
+} from '@/scripts/game'
+
+import { link } from 'bitt'
+
 const events = new Emitter()
 const gridLayer = newLayer({ class: style.grid })
 const mainLayer = newLayer()
@@ -21,11 +24,31 @@ const cursorLayer = newLayer()
 const gameObject = (create) => {
   const state = {}
 
-  events.on('create', () => {
-    events.on('update', create(state, globals))
-  })
+  let updateListener
 
-  return state
+  const destroy = () => {
+    events.removeListener('update', updateListener)
+  }
+
+  const createListener = () => {
+    updateListener = create(
+      state, 
+      { destroy }, 
+      globals,
+    )
+
+    events.on('update', () => updateListener({
+      translateTileSize: int => globals.tileSize * int,
+    }))
+  }
+
+  if (globals.started) createListener() 
+  else events.on('create', createListener)
+
+  return { 
+    state, 
+    destroy,
+  }
 }
 
 const globals = {
@@ -34,18 +57,9 @@ const globals = {
   gridHeight: 0,
   aspectRatio: 0,
   events,
+  started: false,
   gameObject,
 }
-
-const square = gameObject((state, globals) => {
-  state.x = 0
-  state.y = 0
-
-  return () => {
-    const { tileSize } = globals
-    drawRect(mainLayer, state.x * tileSize, state.y * tileSize, tileSize, tileSize)
-  }
-})
 
 const update = () => {
   events.emit('clear')
@@ -53,7 +67,7 @@ const update = () => {
 }
 
 const start = (gridWidth = 30, gridHeight = 15) => {
-  events.on('clear', () => clearLayers(mainLayer))
+  events.on('clear', () => clearLayers(mainLayer, cursorLayer))
 
   const aspectRatio = gridHeight / gridWidth
 
@@ -78,10 +92,14 @@ const start = (gridWidth = 30, gridHeight = 15) => {
     loop = setInterval(update, 1000 / 60)
   })
 
+  cursors(globals, cursorLayer)
+
   events.emit('create')
+
+  globals.started = true
 }
 
-export default () => ['div', { 
+export default ['div', { 
   class: style.game,
 
   onMounted () {
@@ -92,5 +110,7 @@ export default () => ['div', {
 }, [
   ['div', { 
     class: style.container,
-  }, getLayerComponent()],
+  }, [
+    getLayerComponent(),
+  ]],
 ]]

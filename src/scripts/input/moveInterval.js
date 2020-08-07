@@ -1,4 +1,4 @@
-const moveInterval = (controller, button, action) => {
+export const moveInterval = (controller, button, action) => {
   controller.onButtonPress(button, () => {
     let timeout, interval
 
@@ -12,7 +12,7 @@ const moveInterval = (controller, button, action) => {
           clearInterval(interval)
         }
       }, 50)
-    }, 150)
+    }, 200)
     
     const releaseListener = controller.onButtonRelease(button, () => {
       clearTimeout(timeout)
@@ -21,12 +21,4 @@ const moveInterval = (controller, button, action) => {
       releaseListener.removeListener()
     })
   })
-}
-
-const bind = (board, { bindings, ...controller }, options = {}) => {
-  
-}
-
-export const cursorController = {
-  bind,
 }

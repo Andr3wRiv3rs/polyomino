@@ -3,22 +3,20 @@ process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
 
-app.commandLine.appendSwitch('force-color-profile', 'srgb')
-
-const createWindow  = () => {
+const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: true,
-      devTools: process.env.NODE_ENV !== 'production',
+      nodeIntegration: true, 
+      devTools: process.env.NODE_ENV === 'development',
     },
   })
 
   mainWindow.setMenuBarVisibility(false)
 
-  if (process.env.NODE_ENV === 'production') mainWindow.loadFile('dist/index.html')
+  if (process.env.NODE_ENV !== 'development') mainWindow.loadFile('index.html')
   
   else {
     mainWindow.loadURL('http://localhost:53874')

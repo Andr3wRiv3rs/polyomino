@@ -2,24 +2,28 @@
   "name": "polyomino",
   "version": "0.1.0",
   "description": "An arcade puzzle game.",
-  "main": "index.js",
+  "main": "electron/index.js",
   "repository": "https://github.com/Andr3wRiv3rs/polyomino",
   "author": "Andres Sweeney-Rios",
   "license": "N/A",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_ENV=development multiscript webpack-dev-server + electron . --force-color-profile=srgb",
-    "build": "cross-env NODE_ENV=production webpack --mode=production"
+    "start": "electron dist",
+    "dev": "cross-env NODE_ENV=development webpack-dev-server",
+    "build": "yarn build:ui && yarn build:electron",
+    "build:ui": "cross-env NODE_ENV=production webpack --production",
+    "build:electron": "cross-env NODE_ENV=production node ./prebuild && electron-builder"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
+    "copy-webpack-plugin": "^6.0.3",
     "cross-env": "^7.0.2",
     "css-loader": "^3.6.0",
     "electron": "^9.1.1",
+    "electron-builder": "^22.8.0",
     "eslint": "^7.5.0",
     "file-loader": "^6.0.0",
     "html-webpack-plugin": "^4.3.0",
-    "multiscript": "^0.1.8",
     "style-loader": "^1.2.1",
     "webpack": "^4.44.0",
     "webpack-cli": "^3.3.12",
@@ -27,5 +31,18 @@
   },
   "dependencies": {
     "bitt": "^0.1.2"
+  },
+  "build": {
+    "npmRebuild": true,
+    "win": {
+      "icon": "assets/icon.png",
+      "target": [
+        "zip"
+      ]
+    },
+    "directories": {
+      "app": "dist",
+      "output": "build"
+    }
   }
 }

@@ -2,7 +2,11 @@ import game from './views/game'
 
 export default [
   {
-    regex: /^\/?$/,
+    regex: /^$/,
     component: game,
+  },
+  {
+    regex: /.*/,
+    component: '404',
   },
 ]

@@ -21,7 +21,7 @@ window.addEventListener('keydown', ({ key }) => {
   if (keys[key] === undefined) {
     keys[key] = true
     keyboardEmitter.emit(`keyboard-${key}`)
-    keyboardEmitter.emit(`keyboard-any`, key)
+    keyboardEmitter.emit(`keyboard-any`, keyboard, key)
     keyCount++
   }
 })
@@ -29,11 +29,14 @@ window.addEventListener('keydown', ({ key }) => {
 window.addEventListener('keyup', ({ key }) => {
   delete keys[key]
   keyboardEmitter.emit(`keyboard-${key}-up`)
+  keyboardEmitter.emit(`keyboard-any-up`, keyboard, key)
   keyCount--
 })
 
-export const gamepads = {
+export const keyboard = {
   bindings,
+
+  index: 'keyboard',
 
   getButtonDown: key => keys[key],
   getAnyButtonDown: () => keyCount > 0,
