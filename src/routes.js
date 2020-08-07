@@ -1,12 +1,8 @@
-import singleplayer from './views/singleplayer'
+import game from './views/game'
 
 export default [
   {
     regex: /^\/?$/,
-    component: singleplayer,
-  },
-  {
-    regex: /^\/editor\/?$/,
-    module: () => import('./views/editor/'),
+    component: game,
   },
 ]

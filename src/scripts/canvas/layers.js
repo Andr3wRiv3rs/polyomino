@@ -1,10 +1,8 @@
-import style from './board.css'
-
 export const layers = []
 
-export const newLayer = (name, onReady = () => {}) => {
+export const newLayer = (props, onReady = () => {}) => {
   const layer = {
-    name,
+    props,
     canvas: null,
     context: null,
   }
@@ -22,9 +20,9 @@ export const newLayer = (name, onReady = () => {}) => {
 }
 
 export const getLayerComponent = () => {
-  return layers.map(({ name, onMounted }) => {
+  return layers.map(({ props, onMounted }) => {
     return ['canvas', {
-      class: `${name ? style[name] : ''} ${style.canvas}`,
+      ...props,
       onMounted,
     }]
   })

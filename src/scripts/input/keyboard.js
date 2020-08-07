@@ -32,7 +32,7 @@ window.addEventListener('keyup', ({ key }) => {
   keyCount--
 })
 
-export default {
+export const gamepads = {
   bindings,
 
   getButtonDown: key => keys[key],

@@ -31,11 +31,13 @@ const bindings = {
   down: 'down',
   left: 'left',
   right: 'right',
-  rotateLeft: 'a',
-  rotateRight: 'b',
-  previousHeld: 'left-bumper',
-  nextHeld: 'right-bumper',
-  place: 'x',
+  nextTurret: 'right-bumper',
+  previousTurret: 'left-bumper',
+  buy: 'a',
+  use: 'a',
+  shoot: 'a',
+  cancel: 'b',
+  upgrade: 'x',
   pause: 'start',
 }
 
@@ -128,7 +130,7 @@ window.addEventListener('gamepaddisconnected', ({ gamepad }) => {
   }
 })
 
-export default {
+export const keyboard = {
   getGamepad,
 
   on: (...props) => gamepadEmitter.on(...props),

@@ -4,8 +4,10 @@ import { router } from 'bitt'
 
 import routes from '@/routes'
 
-import gamepads from '@/scripts/gamepads'
-import keyboard from '@/scripts/keyboard'
+import { 
+  gamepads, 
+  keyboard,
+} from '@/scripts/input'
 
 window.gamepads = gamepads
 window.keyboard = keyboard

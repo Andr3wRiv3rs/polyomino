@@ -27,6 +27,6 @@ const bind = (board, { bindings, ...controller }, options = {}) => {
   
 }
 
-export default {
+export const cursorController = {
   bind,
 }
