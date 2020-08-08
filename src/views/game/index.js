@@ -14,8 +14,6 @@ import {
   cursors,
 } from '@/scripts/game'
 
-import { link } from 'bitt'
-
 const events = new Emitter()
 const gridLayer = newLayer({ class: style.grid })
 const mainLayer = newLayer()
