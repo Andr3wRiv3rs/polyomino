@@ -12,7 +12,12 @@ import Emitter from 'events'
 
 import { 
   cursors,
+  drawPath,
 } from '@/scripts/game'
+
+import {
+  level1,
+} from '@/scripts/game/levels'
 
 const events = new Emitter()
 const gridLayer = newLayer({ class: style.grid })
@@ -31,13 +36,13 @@ const gameObject = (create) => {
   const createListener = () => {
     updateListener = create(
       state, 
-      { destroy }, 
-      globals,
+      { 
+        ...globals,
+        destroy, 
+      },
     )
 
-    events.on('update', () => updateListener({
-      translateTileSize: int => globals.tileSize * int,
-    }))
+    events.on('update', () => updateListener())
   }
 
   if (globals.started) createListener() 
@@ -49,45 +54,78 @@ const gameObject = (create) => {
   }
 }
 
-const globals = {
-  tileSize: 0,
-  gridWidth: 0,
-  gridHeight: 0,
-  aspectRatio: 0,
-  events,
-  started: false,
-  gameObject,
+const testGridCollide = ({ x, y }) => {
+  return globals.gridColliders[x] && globals.gridColliders[x][y] ? true : false
 }
+
+const addGridColliders = (coordinatesArray) => {
+  for (const { x, y } of coordinatesArray) {
+    if (globals.gridColliders[x] === undefined) globals.gridColliders[x] = []
+    globals.gridColliders[x][y] = true
+  }
+}
+
+const removeGridColliders = (coordinatesArray) => {
+  for (const { x, y } of coordinatesArray) {
+    globals.gridColliders[x].splice(y, 1)
+  }
+}
+
+const translateTileSize = int => Math.ceil(globals.tileSize * int)
 
 const update = () => {
   events.emit('clear')
   events.emit('update')
 }
 
-const start = (gridWidth = 30, gridHeight = 15) => {
+const globals = {
+  tileSize: 0,
+  gridWidth: 0,
+  gridHeight: 0,
+  aspectRatio: 0,
+  framerate: 60,
+  events,
+  started: false,
+  gridColliders: [],
+  gameObject,
+  translateTileSize,
+  testGridCollide,
+  addGridColliders,
+  removeGridColliders,
+  update,
+}
+
+window.globals = globals
+
+const start = (level = level1) => {
   events.on('clear', () => clearLayers(mainLayer, cursorLayer))
 
-  const aspectRatio = gridHeight / gridWidth
+  const aspectRatio = level.height / level.width
 
   Object.assign(globals, {
-    gridWidth,
-    gridHeight,
+    level,
     aspectRatio,
   })
+
+  globals.addGridColliders(level.path())
 
   let loop
 
   setupResizeListener(aspectRatio, () => {
     clearInterval(loop)
 
-    const tileSize = mainLayer.canvas.width / gridWidth
+    const tileSize = mainLayer.canvas.width / level.width
 
     Object.assign(globals, { tileSize })
 
     clearLayers(gridLayer)
-    drawGrid(gridLayer, gridWidth, gridHeight)
 
-    loop = setInterval(update, 1000 / 60)
+    drawPath(level.path, gridLayer, globals)
+    drawGrid(gridLayer, level)
+
+    update()
+
+    loop = setInterval(update, 1000 / globals.framerate)
   })
 
   cursors(globals, cursorLayer)

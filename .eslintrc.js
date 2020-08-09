@@ -45,22 +45,22 @@ module.exports = {
     'object-curly-spacing': ['error', 'always'],
     'object-curly-newline': ['error', {
       ObjectExpression: {
-        minProperties: 4,
+        minProperties: 6,
         multiline: true,
         consistent: true,
       },
       ObjectPattern: {
-        minProperties: 4,
+        minProperties: 6,
         multiline: true,
         consistent: true,
       },
       ImportDeclaration: {
-        minProperties: 2,
+        minProperties: 4,
         multiline: true,
         consistent: true,
       },
       ExportDeclaration: {
-        minProperties: 2,
+        minProperties: 4,
         multiline: true,
         consistent: true,
       },
@@ -71,9 +71,6 @@ module.exports = {
       imports: 'always-multiline',
       exports: 'always-multiline',
       functions: 'always-multiline',
-    }],
-    'object-property-newline': ['error', {
-      allowAllPropertiesOnSameLine: false,
     }],
     'space-in-parens': ['error', 'never'],
     'space-infix-ops': 'error',

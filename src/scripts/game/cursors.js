@@ -9,7 +9,7 @@ import {
 } from '../input'
 
 export const cursors = (globals, layer) => {
-  const { gameObject, gridWidth, gridHeight } = globals
+  const { gameObject, level } = globals
 
   const registeredControllers = []
 
@@ -28,7 +28,7 @@ export const cursors = (globals, layer) => {
 
     const playerColor = playerColors[player - 1]
 
-    const cursor = gameObject((state, { destroy }) => {
+    const cursor = gameObject((state, { destroy, update, testGridCollide, translateTileSize: t }) => {
       state.x = 0
       state.y = 0
       state.player = player
@@ -47,7 +47,7 @@ export const cursors = (globals, layer) => {
       }
 
       const move = (x = 0, y = 0) => {
-        if (state.x + x < 0 || state.x + x >= gridWidth || state.y + y < 0 || state.y + y >= gridHeight) return
+        if (state.x + x < 0 || state.x + x >= level.width || state.y + y < 0 || state.y + y >= level.height) return
 
         if (isColliding({
           x: state.x + x, 
@@ -65,12 +65,14 @@ export const cursors = (globals, layer) => {
 
       console.log(`Cursor activated for controller "${controller.index}"`)
 
-      return ({ translateTileSize: t }) => {
+      return () => {
         const { x, y } = state
 
+        const bw = Math.ceil(t(0.1)) // border width
+
         drawRect(layer, t(x), t(y), t(1), t(1), playerColor)
-        clearRect(layer, t(x + 0.1), t(y + 0.1), t(0.8), t(0.8))
-        drawRect(layer, t(x) + 1, t(y) + 1, t(0.4), t(0.4), playerColor)
+        clearRect(layer, t(x) + bw, t(y) + bw, t(1) - (bw * 2), t(1) - (bw * 2))
+        drawRect(layer, t(x), t(y), t(0.4), t(0.4), playerColor)
       }
     })
 
