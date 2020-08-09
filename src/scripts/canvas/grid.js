@@ -1,4 +1,4 @@
-export const drawGrid = (layer, { level, translateTileSize: t }) => {
+export const drawGrid = (layer, { level, translateTileSize: t, offsetX, offsetY, padding }) => {
   const { canvas, context } = layer
   const { width, height } = level
 
@@ -6,18 +6,13 @@ export const drawGrid = (layer, { level, translateTileSize: t }) => {
 
   context.fillStyle = 'white'
 
-  context.fillRect(0, 0, lineSize, canvas.height)
-  context.fillRect(0, 0, canvas.width, lineSize)
-  context.fillRect(canvas.width - lineSize, 0, lineSize, canvas.height)
-  context.fillRect(0, canvas.height - lineSize, canvas.width, lineSize)
-
   // columns
-  for (let i = 0; i < width; i++) {
-    context.fillRect(t(i + 1), 0, lineSize, canvas.height)
+  for (let i = 0; i < width + 1; i++) {
+    context.fillRect(t(i) + offsetX, offsetY, lineSize, t(level.height))
   }
 
   // rows
-  for (let i = 0; i < height; i++) {
-    context.fillRect(0, t(i + 1), canvas.width, lineSize)
+  for (let i = 0; i < height + 1; i++) {
+    context.fillRect(offsetX, t(i) + offsetY, t(level.width), lineSize)
   }
 }

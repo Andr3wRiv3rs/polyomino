@@ -24,8 +24,8 @@ export const newPath = ({ x, y } = { x: 0, y: 0 }) => {
   }
 }
 
-export const drawPath = (path, layer, { translateTileSize: t }) => {
+export const drawPath = (path, layer, { offsetX, offsetY, translateTileSize: t }) => {
   for (const { x, y } of path()) {
-    drawRect(layer, t(x), t(y), t(1), t(1), 'white')
+    drawRect(layer, t(x) + offsetX, t(y) + offsetY, t(1), t(1), 'white')
   }
 }

@@ -10,6 +10,8 @@ export const newLayer = (props, onReady = () => {}) => {
   layer.onMounted = function () {
     layer.canvas = this
     layer.context = this.getContext('2d')
+    layer.canvas.height = window.innerHeight
+    layer.canvas.width = window.innerWidth
 
     onReady.bind(layer)(layer)
   }
@@ -23,46 +25,17 @@ export const getLayerComponent = () => {
   return layers.map(({ props, onMounted }) => {
     return ['canvas', {
       ...props,
+      width: window.innerWidth,
+      height: window.innerHeight,
       onMounted,
     }]
   })
 }
 
-export const resizeLayer = (width, height) => ({ canvas }) => {
-  canvas.height = height
-  canvas.width = width
-
-  canvas.style.height = height + 'px'
-  canvas.style.width = width + 'px'
+export const resizeLayer = ({ canvas }) => {
+  canvas.height = window.innerHeight
+  canvas.width = window.innerWidth
 }
 
-export const resize = (aspectRatio, callback) => {
-  const container = layers[0].canvas.parentElement
 
-  const padding = 100
-
-  let width = Math.ceil(window.innerWidth - padding)
-  let height = Math.ceil((window.innerWidth - padding) * aspectRatio)
-
-  if (height > window.innerHeight - padding) {
-    height = window.innerHeight - padding
-    width = height / aspectRatio
-  }
-
-  width -= width % 2
-  height -= height % 2
-
-  container.style.width = width + 'px'
-  container.style.height = height + 'px'
-
-  layers.forEach(resizeLayer(width, height))
-  callback()
-} 
-
-export const setupResizeListener = (aspectRatio, callback = () => {}) => {
-  resize(aspectRatio, callback)
-
-  window.addEventListener('resize', () => {
-    resize(aspectRatio, callback)
-  })
-}
+window.addEventListener('resize', () => layers.forEach(resizeLayer))

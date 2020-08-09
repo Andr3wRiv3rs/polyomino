@@ -1,19 +1,9 @@
 .game {
-  display: flex;
-  justify-content: center;
   width: 100%;
   height: 100%;
-  align-items: center;
 }
 
-.container {
-  margin: auto;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.container > canvas {
+.game > canvas {
   height: 100%;
   position: absolute;
   left: 0;

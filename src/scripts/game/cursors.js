@@ -71,6 +71,8 @@ export const setupCursors = (globals, layer) => {
       moveInterval(controller, bindings.left, () => move(-1, 0))
       moveInterval(controller, bindings.right, () => move(+1, 0))
 
+      // TODO: release move listener whenever opposite direction pressed
+
       console.log(`Cursor activated for controller "${controller.index}"`)
 
       return () => {
@@ -78,9 +80,9 @@ export const setupCursors = (globals, layer) => {
 
         const bw = Math.ceil(t(0.1)) // border width
 
-        drawRect(layer, t(x), t(y), t(1), t(1), playerColor)
-        clearRect(layer, t(x) + bw, t(y) + bw, t(1) - (bw * 2), t(1) - (bw * 2))
-        drawRect(layer, t(x), t(y), t(0.4), t(0.4), playerColor)
+        drawRect(layer, t(x) + globals.offsetX, t(y) + globals.offsetY, t(1), t(1), playerColor)
+        clearRect(layer, t(x) + globals.offsetX + bw, t(y) + globals.offsetY + bw, t(1) - (bw * 2), t(1) - (bw * 2))
+        drawRect(layer, t(x) + globals.offsetX, t(y) + globals.offsetY, t(0.4), t(0.4), playerColor)
       }
     })
 
