@@ -41,13 +41,16 @@ export const resize = (aspectRatio, callback) => {
 
   const padding = 100
 
-  let width = window.innerWidth - padding
-  let height = width * aspectRatio
+  let width = Math.ceil(window.innerWidth - padding)
+  let height = Math.ceil((window.innerWidth - padding) * aspectRatio)
 
   if (height > window.innerHeight - padding) {
     height = window.innerHeight - padding
     width = height / aspectRatio
   }
+
+  width -= width % 2
+  height -= height % 2
 
   container.style.width = width + 'px'
   container.style.height = height + 'px'

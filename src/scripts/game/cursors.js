@@ -8,8 +8,14 @@ import {
   moveInterval,
 } from '../input'
 
-export const cursors = (globals, layer) => {
-  const { gameObject, level } = globals
+export const setupCursors = (globals, layer) => {
+  const { 
+    gameObject, 
+    level, 
+    testGridCollide, 
+    translateTileSize: t,
+    update,
+  } = globals
 
   const registeredControllers = []
 
@@ -28,7 +34,7 @@ export const cursors = (globals, layer) => {
 
     const playerColor = playerColors[player - 1]
 
-    const cursor = gameObject((state, { destroy, update, testGridCollide, translateTileSize: t }) => {
+    const cursor = gameObject((state, { destroy }) => {
       state.x = 0
       state.y = 0
       state.player = player
@@ -56,6 +62,8 @@ export const cursors = (globals, layer) => {
 
         state.x += x
         state.y += y
+
+        // console.log(testGridCollide(state))
       }
 
       moveInterval(controller, bindings.up, () => move(0, -1))

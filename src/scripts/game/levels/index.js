@@ -1,1 +1,5 @@
-export * from './level1'
+import { level1 } from './level1'
+
+export const levels = {
+  level1,
+}

@@ -11,13 +11,14 @@ import {
 import Emitter from 'events'
 
 import { 
-  cursors,
+  setupCursors,
   drawPath,
+  testGridCollide,
+  addGridColliders,
+  removeGridColliders,
 } from '@/scripts/game'
 
-import {
-  level1,
-} from '@/scripts/game/levels'
+import { levels } from '@/scripts/game/levels'
 
 const events = new Emitter()
 const gridLayer = newLayer({ class: style.grid })
@@ -27,47 +28,15 @@ const cursorLayer = newLayer()
 const gameObject = (create) => {
   const state = {}
 
-  let updateListener
+  const destroy = () => events.removeListener('update', updateListener)
 
-  const destroy = () => {
-    events.removeListener('update', updateListener)
-  }
+  const updateListener = create(state, { destroy })
 
-  const createListener = () => {
-    updateListener = create(
-      state, 
-      { 
-        ...globals,
-        destroy, 
-      },
-    )
-
-    events.on('update', () => updateListener())
-  }
-
-  if (globals.started) createListener() 
-  else events.on('create', createListener)
+  events.on('update', updateListener)
 
   return { 
     state, 
     destroy,
-  }
-}
-
-const testGridCollide = ({ x, y }) => {
-  return globals.gridColliders[x] && globals.gridColliders[x][y] ? true : false
-}
-
-const addGridColliders = (coordinatesArray) => {
-  for (const { x, y } of coordinatesArray) {
-    if (globals.gridColliders[x] === undefined) globals.gridColliders[x] = []
-    globals.gridColliders[x][y] = true
-  }
-}
-
-const removeGridColliders = (coordinatesArray) => {
-  for (const { x, y } of coordinatesArray) {
-    globals.gridColliders[x].splice(y, 1)
   }
 }
 
@@ -79,14 +48,11 @@ const update = () => {
 }
 
 const globals = {
-  tileSize: 0,
-  gridWidth: 0,
-  gridHeight: 0,
-  aspectRatio: 0,
-  framerate: 60,
-  events,
-  started: false,
-  gridColliders: [],
+  loop: null, // game loop
+  tileSize: 0, // pixel size of each grid tile relative to canvas width 
+  aspectRatio: 0, // quotient of level.height / level.width
+  framerate: 60, // interval set to 1000 / framerate
+  events, // node.js event emitter
   gameObject,
   translateTileSize,
   testGridCollide,
@@ -97,7 +63,9 @@ const globals = {
 
 window.globals = globals
 
-const start = (level = level1) => {
+const start = () => {
+  const level = levels['level1']
+
   events.on('clear', () => clearLayers(mainLayer, cursorLayer))
 
   const aspectRatio = level.height / level.width
@@ -109,44 +77,30 @@ const start = (level = level1) => {
 
   globals.addGridColliders(level.path())
 
-  let loop
+  globals.loop = setInterval(update, 1000 / globals.framerate)
 
   setupResizeListener(aspectRatio, () => {
-    clearInterval(loop)
-
-    const tileSize = mainLayer.canvas.width / level.width
-
-    Object.assign(globals, { tileSize })
+    globals.tileSize = mainLayer.canvas.width / level.width
 
     clearLayers(gridLayer)
 
     drawPath(level.path, gridLayer, globals)
-    drawGrid(gridLayer, level)
+    drawGrid(gridLayer, globals)
 
     update()
-
-    loop = setInterval(update, 1000 / globals.framerate)
   })
 
-  cursors(globals, cursorLayer)
+  setupCursors(globals, cursorLayer)
 
   events.emit('create')
-
-  globals.started = true
 }
 
 export default ['div', { 
   class: style.game,
 
   onMounted () {
-    requestAnimationFrame(() => {
-      start()
-    })
+    requestAnimationFrame(start)
   },
 }, [
-  ['div', { 
-    class: style.container,
-  }, [
-    getLayerComponent(),
-  ]],
+  ['div', { class: style.container }, getLayerComponent()],
 ]]
