@@ -1,5 +1,3 @@
-import { drawRect } from '../canvas'
-
 export const newPath = ({ x, y } = { x: 0, y: 0 }) => {
   const move = (offsetX, offsetY) => {
     x += offsetX
@@ -26,6 +24,10 @@ export const newPath = ({ x, y } = { x: 0, y: 0 }) => {
 
 export const drawPath = (path, layer, { offsetX, offsetY, translateTileSize: t }) => {
   for (const { x, y } of path()) {
-    drawRect(layer, t(x) + offsetX, t(y) + offsetY, t(1), t(1), 'white')
+    layer.drawRect(t(x) + offsetX, t(y) + offsetY, t(1), t(1), 'white')
+  }
+  
+  for (const { x, y } of path()) {
+    layer.drawRect(t(x) + offsetX, t(y) + offsetY, t(1), t(1), 'white')
   }
 }

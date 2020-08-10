@@ -16,6 +16,7 @@ import {
   removeGridColliders,
   gameObject,
   gameObjects,
+  spawnEnemy,
 } from '@/scripts/game'
 
 import { levels } from '@/scripts/game/levels'
@@ -56,7 +57,7 @@ const computeResize = () => {
 
   globals.tileSize = (window.innerWidth - globals.offsetX * 2) / globals.level.width
 
-  clearLayers(gridLayer)
+  gridLayer.clear()
 
   drawPath(globals.level.path, gridLayer, globals)
   drawGrid(gridLayer, globals)
@@ -67,7 +68,7 @@ const computeResize = () => {
 export default ['div', { 
   class: style.game,
 
-  onMounted () {
+  async onMounted () {
     globals.level = levels['level1']
   
     addGridColliders(globals.level.path())
@@ -79,5 +80,11 @@ export default ['div', {
     window.addEventListener('resize', computeResize)
   
     setupCursors(globals, cursorLayer)
+
+    for (const wave of globals.level.waves()) {
+      for await (const enemy of wave()) {
+        spawnEnemy(globals, mainLayer, enemy)
+      }
+    }
   },
 }, getLayerComponent()]

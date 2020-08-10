@@ -1,5 +1,5 @@
 export const drawGrid = (layer, { level, translateTileSize: t, offsetX, offsetY, padding }) => {
-  const { canvas, context } = layer
+  const { context } = layer
   const { width, height } = level
 
   const lineSize = 1

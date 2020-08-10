@@ -1,6 +1,8 @@
+import { drawHook } from '../canvas'
+
 export const layers = []
 
-export const newLayer = (props, onReady = () => {}) => {
+export const newLayer = (props = {}, onReady = () => {}) => {
   const layer = {
     props,
     canvas: null,
@@ -12,8 +14,15 @@ export const newLayer = (props, onReady = () => {}) => {
     layer.context = this.getContext('2d')
     layer.canvas.height = window.innerHeight
     layer.canvas.width = window.innerWidth
+    layer.props = props
 
-    onReady.bind(layer)(layer)
+    if (props.blur) {
+      layer.context.filter = "blur(10px)"
+    }
+
+    Object.assign(layer, drawHook(layer))
+
+    onReady(layer)
   }
 
   layers.push(layer)
@@ -32,9 +41,14 @@ export const getLayerComponent = () => {
   })
 }
 
-export const resizeLayer = ({ canvas }) => {
+export const resizeLayer = ({ canvas, props }) => {
   canvas.height = window.innerHeight
   canvas.width = window.innerWidth
+
+  if (props.blur) {
+    canvas.height = window.innerHeight / 10
+    canvas.width = window.innerWidth / 10
+  }
 }
 
 

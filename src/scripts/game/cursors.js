@@ -1,6 +1,4 @@
-import { 
-  drawRect, 
-  clearRect,
+import {
   colors,
 } from '../canvas'
 
@@ -80,9 +78,11 @@ export const setupCursors = (globals, layer) => {
 
         const bw = Math.ceil(t(0.1)) // border width
 
-        drawRect(layer, t(x) + globals.offsetX, t(y) + globals.offsetY, t(1), t(1), playerColor)
-        clearRect(layer, t(x) + globals.offsetX + bw, t(y) + globals.offsetY + bw, t(1) - (bw * 2), t(1) - (bw * 2))
-        drawRect(layer, t(x) + globals.offsetX, t(y) + globals.offsetY, t(0.4), t(0.4), playerColor)
+        requestAnimationFrame(() => {
+          layer.drawRect(t(x) + globals.offsetX, t(y) + globals.offsetY, t(1), t(1), playerColor)
+          layer.clearRect(t(x) + globals.offsetX + bw, t(y) + globals.offsetY + bw, t(1) - (bw * 2), t(1) - (bw * 2))
+          layer.drawRect(t(x) + globals.offsetX, t(y) + globals.offsetY, t(0.4), t(0.4), playerColor)
+        })
       }
     })
 
